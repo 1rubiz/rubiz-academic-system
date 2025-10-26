@@ -53,6 +53,11 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           draft: false
-          files: dist/**
+          files: |
+            dist/**/*.exe
+            dist/**/*.dmg
+            dist/**/*.AppImage
+            dist/**/*.deb
+            dist/**/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
