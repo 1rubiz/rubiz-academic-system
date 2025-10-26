@@ -1,4 +1,4 @@
-name: Build/release Electron app
+name: Build and Release Electron app
 
 on:
   push:
@@ -14,30 +14,36 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
-      - name: Check out Git repository
+      - name: Check out repository
         uses: actions/checkout@v3
 
-      - name: Install Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 20 # Match your Electron major version runtime if possible
 
-      - name: Install Dependencies
-        run: npm install
+      - name: Install dependencies
+        run: npm ci
 
-      - name: build-linux
+      # 🧩 Rebuild all native modules for Electron (important)
+      - name: Rebuild native modules for Electron
+        run: npx electron-builder install-app-deps
+
+      # 🧱 Build for each OS
+      - name: Build for Linux
         if: matrix.os == 'ubuntu-latest'
         run: npm run build:linux
 
-      - name: build-mac
+      - name: Build for macOS
         if: matrix.os == 'macos-latest'
         run: npm run build:mac
 
-      - name: build-win
+      - name: Build for Windows
         if: matrix.os == 'windows-latest'
         run: npm run build:win
 
-      - name: release
+      # 🚀 Release artifacts
+      - name: Create draft GitHub release
         uses: softprops/action-gh-release@v1
         with:
           draft: true
