@@ -30,6 +30,7 @@ jobs:
           else
             npm run build:win
           fi
+        shell: bash {0} # Add this line to force the use of Bash
 
       # 🧳 Upload artifacts so next job can use them
       - name: Upload artifacts
