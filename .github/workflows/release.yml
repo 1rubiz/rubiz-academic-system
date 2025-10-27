@@ -11,6 +11,13 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: windows-latest
+            electron_version: 37.2.6     # ✅ Modern (Win 10/11)
+            label: modern
+          - os: windows-latest
+            electron_version: 22.3.27     # 🕹️ Legacy (Win 8.1)
+            label: legacy
 
     steps:
       - uses: actions/checkout@v3
@@ -18,7 +25,14 @@ jobs:
         with:
           node-version: 20
 
-      - run: npm ci
+      - name: Install dependencies
+        run: |
+          npm ci
+          if [ -n "${{ matrix.electron_version }}" ]; then
+            npm install electron@${{ matrix.electron_version }}
+          fi
+        shell: bash
+
       - run: npx electron-builder install-app-deps
 
       - name: Build App
@@ -30,14 +44,21 @@ jobs:
           else
             npm run build:win
           fi
-        shell: bash {0} # Add this line to force the use of Bash
+        shell: bash
 
-      # 🧳 Upload artifacts so next job can use them
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      - name: Rename and Upload artifacts
+        run: |
+          mkdir -p release
+          for f in dist/*; do
+            base=$(basename "$f")
+            mv "$f" "release/${{ matrix.label || 'default' }}-${base}"
+          done
+        shell: bash
+
+      - uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.os }}-artifacts
-          path: dist/
+          name: ${{ matrix.os }}-${{ matrix.label || 'default' }}-artifacts
+          path: release/
 
   release:
     needs: build
@@ -59,5 +80,11 @@ jobs:
             dist/**/*.AppImage
             dist/**/*.deb
             dist/**/*.zip
+          body: |
+            🚀 **Academic Records Rubiz Release**
+
+            - 🟢 Modern Build → Windows 10/11 (Electron 37.2.6)
+            - 🕹️ Legacy Build → Windows 8.1 (Electron 22.3.27)
+            - 💻 Includes Linux and macOS builds
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

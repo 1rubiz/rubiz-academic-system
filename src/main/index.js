@@ -7,6 +7,7 @@ import path from 'path'
 import fs from 'fs'
 import os from 'os'
 import { fileURLToPath } from 'url'
+import { autoUpdater } from 'electron-updater'
 import { registerDepartmentHandlers } from './handlers/departments.js'
 import { registerCourseHandlers } from './handlers/courses.js'
 import { registerStudentHandlers } from './handlers/students.js'
@@ -27,7 +28,6 @@ let loadingWindow
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 const preloadPath = join(__dirname, '../preload/index.js')
-console.log(preloadPath)
 
 // const dbPath = path.join(process.cwd(), "db/academic_records.db");
 
@@ -261,6 +261,9 @@ app.whenReady().then(() => {
 
   createLoadingWindow()
   createWindow()
+  if (app.isPackaged) {
+    autoUpdater.checkForUpdatesAndNotify()
+  }
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

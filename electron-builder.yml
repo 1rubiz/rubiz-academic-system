@@ -1,7 +1,10 @@
 appId: com.electron.app
 productName: academic-records-rubiz
+
 directories:
   buildResources: build
+  output: release  # optional, for clarity
+
 files:
   - '!**/.vscode/*'
   - '!src/*'
@@ -10,32 +13,48 @@ files:
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
 asarUnpack:
   - resources/**
+
+# ✅ App icons
 win:
+  icon: resources/icons/win/icon.ico
   executableName: academic-records-rubiz
+
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
+
 mac:
+  icon: resources/icons/mac/icon.icns
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
-    # - NSCameraUsageDescription: Application requests access to the device's camera.
-    # - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
   notarize: false
+
 dmg:
   artifactName: ${name}-${version}.${ext}
+
 linux:
+  icon: resources/icons/deb/icon.png
   target:
     - AppImage
     - deb
   maintainer: electronjs.org
   category: Utility
+
 appImage:
   artifactName: ${name}-${version}.${ext}
+
 npmRebuild: false
+
 publish:
-  provider: generic
-  url: https://example.com/auto-updates
+  provider: github
+  owner: 1rubiz
+  repo: rubiz-academic-system 
+  releaseType: release
+
+# ✅ Optional: Linux sandbox permission fix after build
+afterPack: |
+  chmod 4755 "{{ dir }}/chrome-sandbox" || true

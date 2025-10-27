@@ -1,4 +1,6 @@
+/* eslint-disable react/prop-types */
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   Plus,
   ChevronRight,
@@ -42,16 +44,17 @@ import { toast } from 'react-toastify'
 
 export default function AcademicRecordDashboard() {
   const [currentStep, setCurrentStep] = useState('main')
+  const [activeModal, setActiveModal] = useState(null)
   const [selectedFaculty, setSelectedFaculty] = useState(null)
   const [selectedYear, setSelectedYear] = useState(null)
   const [departments, setDepartments] = useState(null)
   const [selectedDepartment, setSelectedDepartment] = useState(null)
-  const [showFacultyModal, setShowFacultyModal] = useState(false)
-  const [showYearModal, setShowYearModal] = useState(false)
-  const [showCourseModal, setShowCourseModal] = useState(false)
-  const [showDepartmentModal, setShowdDepartmentModal] = useState(false)
-  const [showStudentModal, setShowStudentModal] = useState(null)
-  const [showUploadModal, setShowUploadModal] = useState(false)
+  // const [showFacultyModal, setShowFacultyModal] = useState(false)
+  // const [showYearModal, setShowYearModal] = useState(false)
+  // const [showCourseModal, setShowCourseModal] = useState(false)
+  // const [showDepartmentModal, setShowdDepartmentModal] = useState(false)
+  // const [showStudentModal, setShowStudentModal] = useState(null)
+  // const [showUploadModal, setShowUploadModal] = useState(false)
   const [selectedCourse, setSelectedCourse] = useState('')
   const [courses, setCourses] = useState([])
   const [firstSmesterCourses, setFirstSemesterCourses] = useState([])
@@ -130,6 +133,7 @@ export default function AcademicRecordDashboard() {
       await window.api.sessions.removeCourseFromSemester(semesterId, courseId)
       fetchSemesterCourses()
       toast.success('Course removed successfully')
+      // eslint-disable-next-line no-unused-vars
     } catch (error) {
       toast.error('Failed to remove course')
     }
@@ -289,13 +293,75 @@ export default function AcademicRecordDashboard() {
         )}
       </div>
       <div className="h-full flex items-center justify-center">
-        <Button className="flex items-center gap-2" onClick={() => setShowCourseModal(true)}>
+        <Button className="flex items-center gap-2" onClick={() => setActiveModal('course')}>
           {' '}
           <BookTypeIcon /> Create Course
         </Button>
       </div>
     </div>
   )
+
+  function ModalManager({ activeModal, data, closeAll }) {
+    if (!activeModal) return null
+
+    const close = async () => {
+      switch (activeModal) {
+        case 'faculty':
+          await data.fetchFaculties?.()
+          break
+        case 'department':
+          await data.fetchDepartments?.()
+          break
+        case 'course':
+          await data.fetchCourses?.()
+          break
+        case 'session':
+          await data.fetchSessions?.()
+          break
+        case 'student':
+          await data.fetchStudents?.()
+          break
+      }
+      closeAll()
+    }
+
+    const modalContent = {
+      faculty: <FacultyManager />,
+      department: <DepartmentPage id={data.selectedFaculty?.id} />,
+      course: <CoursePage />,
+      session: <SessionManager id={data.selectedFaculty?.id} setData={data.setAcademicYears} />,
+      student: (
+        <StudentPage
+          facultyId={data.selectedFaculty?.id}
+          department={data.selectedDepartment}
+          level={data.level}
+          onComplete={data.fetchStudents}
+        />
+      ),
+      upload: (
+        <ExcelUploader
+          departmentId={data.selectedDepartment?.id}
+          facultyId={data.selectedFaculty?.id}
+          onClose={data.filterStudents}
+        />
+      )
+    }[activeModal]
+
+    return createPortal(
+      <div className="fixed inset-0 bg-gray-200 bg-opacity-50 flex items-center justify-center z-9999">
+        <div className="min-w-md max-w-md bg-white p-6 rounded-lg shadow-lg">
+          {modalContent}
+          <Button
+            onClick={close}
+            className="mt-4 w-full text-center cursor-pointer px-4 py-3 border-2 border-gray-300 rounded-lg hover:bg-slate-700 transition"
+          >
+            Close
+          </Button>
+        </div>
+      </div>,
+      document.body
+    )
+  }
 
   const renderMainDashboard = () => (
     <div className="space-y-6">
@@ -337,7 +403,7 @@ export default function AcademicRecordDashboard() {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-gray-900">Select or Create Faculty</h2>
           <button
-            onClick={() => setShowFacultyModal(true)}
+            onClick={() => setActiveModal('faculty')}
             className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
           >
             <Plus size={18} />
@@ -368,7 +434,7 @@ export default function AcademicRecordDashboard() {
           <div className="w-full shadow my-4 p-4">
             <div className="w-full flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">Select or Create Department</h2>
-              <Button className="bg-black" onClick={() => setShowdDepartmentModal(true)}>
+              <Button className="bg-black" onClick={() => setActiveModal('department')}>
                 Create Department
               </Button>
             </div>
@@ -406,7 +472,7 @@ export default function AcademicRecordDashboard() {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-gray-900">Select or Create Academic Year</h2>
           <button
-            onClick={() => setShowYearModal(true)}
+            onClick={() => setActiveModal('session')}
             className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
           >
             <Plus size={18} />
@@ -615,14 +681,14 @@ export default function AcademicRecordDashboard() {
               Download Mark Sheet
             </div>
             <div
-              onClick={() => setShowUploadModal(true)}
+              onClick={() => setActiveModal('upload')}
               className="flex cursor-pointer items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
             >
               <FileUp size={18} />
               Upload students
             </div>
             <div
-              onClick={() => setShowStudentModal(true)}
+              onClick={() => setActiveModal('student')}
               className="flex cursor-pointer items-center gap-2 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition"
             >
               <Plus size={18} />
@@ -757,7 +823,23 @@ export default function AcademicRecordDashboard() {
         {currentStep === 'students' && renderStudentDashboard()}
       </div>
 
-      {showFacultyModal && (
+      <ModalManager
+        activeModal={activeModal}
+        data={{
+          selectedFaculty,
+          selectedDepartment,
+          level,
+          setAcademicYears,
+          fetchFaculties,
+          fetchDepartmentsByFaculty,
+          fetchCourses,
+          fetchSessions,
+          fetchStudents,
+          filterStudents
+        }}
+        closeAll={() => setActiveModal(null)}
+      />
+      {/* {showFacultyModal && (
         <div className="absolute inset-0 bg-gray-200 bg-opacity-50 flex items-center justify-center z-50">
           <div className="min-w-md max-w-md">
             <FacultyManager />
@@ -860,7 +942,7 @@ export default function AcademicRecordDashboard() {
             </Button>
           </div>
         </div>
-      )}
+      )} */}
       <MarksheetModal
         open={showMarksheet}
         onClose={() => setShowMarksheet(false)}
