@@ -208,8 +208,8 @@ function createLoadingWindow() {
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    fullscreen: true, // 🧱 Start app in full screen
+    backgroundColor: '#000000', // optional — smooth startup look
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
