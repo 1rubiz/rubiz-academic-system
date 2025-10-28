@@ -10,17 +10,22 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
-        electron_version: [37.2.6]
+        # Simple matrix with separate Windows builds
         include:
+          - os: ubuntu-latest
+            electron_version: 37.2.6
+            build_script: build:linux
+          - os: macos-latest  
+            electron_version: 37.2.6
+            build_script: build:mac
           - os: windows-latest
             electron_version: 37.2.6
-            label: modern
+            build_script: build:win
+            suffix: modern
           - os: windows-latest
             electron_version: 22.3.27
-            label: legacy
-    env:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+            build_script: build:win
+            suffix: legacy
 
     steps:
       - uses: actions/checkout@v3
@@ -36,42 +41,31 @@ jobs:
           fi
         shell: bash
 
-      - name: Install app deps (skip for legacy)
-        run: |
-          # Skip electron-builder install-app-deps for legacy Windows build
-          if [ "${{ matrix.label }}" != "legacy" ]; then
-            npx electron-builder install-app-deps
-          else
-            echo "Skipping electron-builder install-app-deps for legacy build"
-            # Alternative: use rebuild with specific flags
-            npx @electron/rebuild --version ${{ matrix.electron_version }} --arch x64 --force
-          fi
-        shell: bash
+      - name: Install app deps
+        run: npx electron-builder install-app-deps
+        # Only skip for legacy if absolutely necessary
+        # if: matrix.electron_version != '22.3.27'
 
       - name: Build App
-        run: |
-          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-            npm run build:linux
-          elif [ "${{ matrix.os }}" == "macos-latest" ]; then
-            ELECTRON_BUILDER_ALLOW_SUDO=true npm run build:mac
-          else
-            npm run build:win
-          fi
+        run: npm run ${{ matrix.build_script }}
         shell: bash
 
-      - name: Rename and Upload artifacts
+      - name: Rename Windows artifacts for legacy/modern
+        if: matrix.suffix
         run: |
-          mkdir -p release
-          for f in dist/*; do
-            base=$(basename "$f")
-            mv "$f" "release/${{ matrix.label || 'default' }}-${base}"
+          cd dist
+          for file in *; do
+            if [ -f "$file" ]; then
+              mv "$file" "${{ matrix.suffix }}-$file"
+            fi
           done
         shell: bash
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.os }}-${{ matrix.label || 'default' }}-artifacts
-          path: release/
+          name: ${{ matrix.os }}-${{ matrix.suffix || 'default' }}-artifacts
+          path: dist/
 
   release:
     needs: build
@@ -97,6 +91,7 @@ jobs:
             dist/**/*.zip
           body: |
             🚀 **Academic Records Rubiz Release**
+
             - 🟢 Modern Build → Windows 10/11 (Electron 37.2.6)
             - 🕹️ Legacy Build → Windows 8.1 (Electron 22.3.27)
             - 💻 Includes Linux and macOS builds
