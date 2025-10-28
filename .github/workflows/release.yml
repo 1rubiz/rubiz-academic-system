@@ -18,7 +18,9 @@ jobs:
           - os: windows-latest
             electron_version: 22.3.27     # 🕹️ Legacy (Win 8.1)
             label: legacy
-
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}  # 👈 Add this line
+      
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
