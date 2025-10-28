@@ -83,6 +83,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           draft: false
+          overwrite: true
           files: |
             release/**/*.exe
             release/**/*.dmg
