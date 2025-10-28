@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - v*.*.*
+  permissions:
+    contents: write  # This allows the job to create releases
 
 jobs:
   build:
@@ -20,7 +22,7 @@ jobs:
             label: legacy
     env:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}  # 👈 Add this line
-      
+
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
