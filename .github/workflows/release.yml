@@ -10,18 +10,17 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # Fixed matrix structure - creates separate jobs properly
         os: [ubuntu-latest, macos-latest]
         electron_version: [37.2.6]
         include:
           - os: windows-latest
-            electron_version: 37.2.6     # ✅ Modern (Win 10/11)
+            electron_version: 37.2.6
             label: modern
           - os: windows-latest
-            electron_version: 22.3.27     # 🕹️ Legacy (Win 8.1)
+            electron_version: 22.3.27
             label: legacy
     env:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Use the built-in token
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
     steps:
       - uses: actions/checkout@v3
@@ -37,11 +36,20 @@ jobs:
           fi
         shell: bash
 
-      - run: npx electron-builder install-app-deps
+      - name: Install app deps (skip for legacy)
+        run: |
+          # Skip electron-builder install-app-deps for legacy Windows build
+          if [ "${{ matrix.label }}" != "legacy" ]; then
+            npx electron-builder install-app-deps
+          else
+            echo "Skipping electron-builder install-app-deps for legacy build"
+            # Alternative: use rebuild with specific flags
+            npx @electron/rebuild --version ${{ matrix.electron_version }} --arch x64 --force
+          fi
+        shell: bash
 
       - name: Build App
         run: |
-          # Add sandbox disable for macOS to fix your previous error
           if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
             npm run build:linux
           elif [ "${{ matrix.os }}" == "macos-latest" ]; then
@@ -68,9 +76,8 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
-    # ✅ CORRECT placement for permissions
     permissions:
-      contents: write  # This allows the job to create releases
+      contents: write
 
     steps:
       - name: Download all build artifacts
@@ -90,10 +97,8 @@ jobs:
             dist/**/*.zip
           body: |
             🚀 **Academic Records Rubiz Release**
-
             - 🟢 Modern Build → Windows 10/11 (Electron 37.2.6)
             - 🕹️ Legacy Build → Windows 8.1 (Electron 22.3.27)
             - 💻 Includes Linux and macOS builds
         env:
-          # ✅ Use the built-in GITHUB_TOKEN which now has write permissions
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
