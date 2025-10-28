@@ -56,5 +56,4 @@ publish:
   releaseType: release
 
 # ✅ Optional: Linux sandbox permission fix after build
-afterPack: |
-  chmod 4755 "{{ dir }}/chrome-sandbox" || true
+afterPack: ./scripts/fix-sandbox.js
