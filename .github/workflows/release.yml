@@ -31,7 +31,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
       - uses: actions/setup-node@v3
         with:
           node-version: 20
@@ -44,21 +43,20 @@ jobs:
           fi
         shell: bash
 
-      - name: Install app dependencies
+      - name: Install app deps
         run: npx electron-builder install-app-deps
 
       - name: Build App
         run: npm run ${{ matrix.build_script }}
         shell: bash
 
-      - name: Rename Windows artifacts (legacy/modern)
+      - name: Rename Windows artifacts for legacy/modern
         if: matrix.suffix
         run: |
-          mkdir -p release
-          cd dist
+          cd release
           for file in *; do
             if [ -f "$file" ]; then
-              mv "$file" "../release/${{ matrix.suffix }}-$file"
+              mv "$file" "${{ matrix.suffix }}-$file"
             fi
           done
         shell: bash
@@ -67,7 +65,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}-${{ matrix.suffix || 'default' }}-artifacts
-          path: release/ || dist/
+          path: release/
 
   release:
     needs: build
@@ -79,19 +77,18 @@ jobs:
       - name: Download all build artifacts
         uses: actions/download-artifact@v4
         with:
-          path: dist
-          merge-multiple: true # ✅ Ensures all OS builds land in one folder
+          path: release
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           draft: false
           files: |
-            dist/**/*.exe
-            dist/**/*.dmg
-            dist/**/*.AppImage
-            dist/**/*.deb
-            dist/**/*.zip
+            release/**/*.exe
+            release/**/*.dmg
+            release/**/*.AppImage
+            release/**/*.deb
+            release/**/*.zip
           body: |
             🚀 **Academic Records Rubiz Release**
 
