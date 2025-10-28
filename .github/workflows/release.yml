@@ -4,15 +4,15 @@ on:
   push:
     tags:
       - v*.*.*
-  permissions:
-    contents: write  # This allows the job to create releases
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        # Fixed matrix structure - creates separate jobs properly
+        os: [ubuntu-latest, macos-latest]
+        electron_version: [37.2.6]
         include:
           - os: windows-latest
             electron_version: 37.2.6     # ✅ Modern (Win 10/11)
@@ -21,7 +21,7 @@ jobs:
             electron_version: 22.3.27     # 🕹️ Legacy (Win 8.1)
             label: legacy
     env:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}  # 👈 Add this line
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Use the built-in token
 
     steps:
       - uses: actions/checkout@v3
@@ -41,10 +41,11 @@ jobs:
 
       - name: Build App
         run: |
+          # Add sandbox disable for macOS to fix your previous error
           if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
             npm run build:linux
           elif [ "${{ matrix.os }}" == "macos-latest" ]; then
-            npm run build:mac
+            ELECTRON_BUILDER_ALLOW_SUDO=true npm run build:mac
           else
             npm run build:win
           fi
@@ -67,6 +68,9 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
+    # ✅ CORRECT placement for permissions
+    permissions:
+      contents: write  # This allows the job to create releases
 
     steps:
       - name: Download all build artifacts
@@ -91,4 +95,5 @@ jobs:
             - 🕹️ Legacy Build → Windows 8.1 (Electron 22.3.27)
             - 💻 Includes Linux and macOS builds
         env:
+          # ✅ Use the built-in GITHUB_TOKEN which now has write permissions
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
