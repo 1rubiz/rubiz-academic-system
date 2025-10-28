@@ -10,12 +10,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # Simple matrix with separate Windows builds
         include:
           - os: ubuntu-latest
             electron_version: 37.2.6
             build_script: build:linux
-          - os: macos-latest  
+          - os: macos-latest
             electron_version: 37.2.6
             build_script: build:mac
           - os: windows-latest
@@ -32,6 +31,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
       - uses: actions/setup-node@v3
         with:
           node-version: 20
@@ -44,22 +44,21 @@ jobs:
           fi
         shell: bash
 
-      - name: Install app deps
+      - name: Install app dependencies
         run: npx electron-builder install-app-deps
-        # Only skip for legacy if absolutely necessary
-        # if: matrix.electron_version != '22.3.27'
 
       - name: Build App
         run: npm run ${{ matrix.build_script }}
         shell: bash
 
-      - name: Rename Windows artifacts for legacy/modern
+      - name: Rename Windows artifacts (legacy/modern)
         if: matrix.suffix
         run: |
+          mkdir -p release
           cd dist
           for file in *; do
             if [ -f "$file" ]; then
-              mv "$file" "${{ matrix.suffix }}-$file"
+              mv "$file" "../release/${{ matrix.suffix }}-$file"
             fi
           done
         shell: bash
@@ -68,7 +67,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}-${{ matrix.suffix || 'default' }}-artifacts
-          path: dist/
+          path: release/ || dist/
 
   release:
     needs: build
@@ -81,6 +80,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: dist
+          merge-multiple: true # ✅ Ensures all OS builds land in one folder
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v1
