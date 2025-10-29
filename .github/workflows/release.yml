@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ .os }}
     strategy:
       matrix:
         include:
@@ -15,7 +15,7 @@ jobs:
             electron_version: 37.2.6
             build_script: build:linux
           - os: macos-latest
-            electron_version: 37.2.6
+            electron_matrixversion: 37.2.6
             build_script: build:mac
           - os: windows-latest
             electron_version: 37.2.6
@@ -65,7 +65,7 @@ jobs:
         shell: bash
 
       - name: Clean non-Windows artifacts
-        if: !matrix.suffix
+        if: ${{ !matrix.suffix }}
         run: |
           cd release
           # Remove temporary files for all platforms
