@@ -40,6 +40,7 @@ import ExcelUploader from '../students/Upload'
 import MarksheetModal from '../students/Marksheetmodal'
 import StudentSearch from '../students/_components/search'
 import { toast } from 'react-toastify'
+import bgImage from '../../assets/wavy-lines.svg'
 // import { generateResultExcel } from '@/utils/generateResultSheet';
 
 export default function AcademicRecordDashboard() {
@@ -68,6 +69,11 @@ export default function AcademicRecordDashboard() {
   const [students, setStudents] = useState([])
   const [studentSummary, setStudentSummary] = useState({ total: 0, complete: 0, incomplete: 0 })
   const [studentFilter, setStudetFilter] = useState('all')
+
+  // const reset = ()=> {
+  //   setCurrentStep('main')
+
+  // }
 
   //   const [newFaculty, setNewFaculty] = useState({ name: '', departments: '', students: '' });
   //   const [newYear, setNewYear] = useState({ year: '', status: 'Active' });
@@ -172,7 +178,7 @@ export default function AcademicRecordDashboard() {
   }, [studentFilter])
 
   const fetchDepartmentsByFaculty = async () => {
-    console.log(selectedFaculty.id)
+    // console.log(selectedFaculty.id)
     const data = await window.api.departments.getDepartmentByFaculty(selectedFaculty.id)
     // console.log(data)
     setDepartments(data)
@@ -186,7 +192,7 @@ export default function AcademicRecordDashboard() {
     const data = await window.api.sessions.getSession(selectedFaculty.id)
     // const data = await window.api.sessions.getSessions();
     setAcademicYears(data)
-    console.log('years', data)
+    // console.log('years', data)
     // console.log(data)
   }
 
@@ -194,7 +200,7 @@ export default function AcademicRecordDashboard() {
     const data = await window.api.sessions.getSessions()
     // const data = await window.api.sessions.getSessions();
     setSessions(data)
-    console.log('years', data)
+    // console.log('years', data)
   }
 
   const fetchSemesterCourses = async () => {
@@ -262,7 +268,7 @@ export default function AcademicRecordDashboard() {
         {selectedFaculty && (
           <>
             <ChevronRight size={16} />
-            <button onClick={() => setCurrentStep('year')} className="hover:text-blue-600">
+            <button onClick={() => setCurrentStep('main')} className="hover:text-blue-600">
               {selectedFaculty.name}
             </button>
           </>
@@ -348,9 +354,18 @@ export default function AcademicRecordDashboard() {
     }[activeModal]
 
     return createPortal(
-      <div className="fixed inset-0 bg-gray-200 bg-opacity-50 flex items-center justify-center z-9999">
+      <div
+        className={`fixed inset-0 bg-gray-200 bg-opacity-50 flex items-center justify-center z-9999`}
+        style={{
+          backgroundImage: `url(${bgImage})`,
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center',
+          backgroundSize: 'cover',
+        }}
+      >
         <div className="min-w-md max-w-md bg-white p-6 rounded-lg shadow-lg">
           {modalContent}
+          <img src="../../assets/wavy-lines.svg" alt="" />
           <Button
             onClick={close}
             className="mt-4 w-full text-center cursor-pointer px-4 py-3 border-2 border-gray-300 rounded-lg hover:bg-slate-700 transition"

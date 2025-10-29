@@ -18,14 +18,15 @@ export default function DepartmentPage({ id }) {
   // Mock local DB fetch (replace with IPC in Electron)
   const fetchDepartments = async () => {
     const res = await window.api.departments.getDepartments()
-    console.log(res)
+    // console.log(res)
     setDepartments(res)
   }
 
   const handleAdd = async () => {
-    console.log(id)
+    // console.log(id)
     if (!id) {
       alert('Select a faculty')
+      toast.error('Please select a faculty')
     }
     await window.api.departments.addDepartment(name, code, id)
     setName('')

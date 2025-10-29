@@ -50,15 +50,26 @@ jobs:
         run: npm run ${{ matrix.build_script }}
         shell: bash
 
-      - name: Rename Windows artifacts for legacy/modern
+      - name: Clean and rename Windows artifacts ie Legacy/modern
         if: matrix.suffix
         run: |
           cd release
+          # Remove elevate.exe and other temporary files that shouldn't be uploaded
+          rm -f elevate.exe *.yml *.blockmap *-unpacked || true
+          # Rename remaining files with suffix
           for file in *; do
             if [ -f "$file" ]; then
               mv "$file" "${{ matrix.suffix }}-$file"
             fi
           done
+        shell: bash
+
+      - name: Clean non-Windows artifacts
+        if: !matrix.suffix
+        run: |
+          cd release
+          # Remove temporary files for all platforms
+          rm -f elevate.exe *.yml *.blockmap *-unpacked || true
         shell: bash
 
       - name: Upload artifacts

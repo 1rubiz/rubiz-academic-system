@@ -22,6 +22,17 @@ export function registerCourseHandlers() {
     return stmt.all()
   })
 
+  ipcMain.handle('get-courses-by-department', async (_, departmentId) => {
+    const stmt = db.prepare(`
+      SELECT c.*, d.name AS department_name
+      FROM courses c
+      LEFT JOIN departments d ON c.department_id = d.id
+      WHERE c.department_id = ?
+    `)
+    return stmt.all(departmentId)
+  })
+
+
   ipcMain.handle('update-course', async (_, id, updates) => {
     const fields = Object.keys(updates)
       .map((key) => `${key} = ?`)

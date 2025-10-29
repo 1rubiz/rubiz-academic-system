@@ -1,12 +1,12 @@
 // import * as React from 'react'
 import {
-  BookOpen,
-  Bot,
-  // Frame,
-  // Map,
-  // PieChart,
-  // Settings2,
-  Settings,
+  // BookOpen,
+  // Bot,
+  // // Frame,
+  // // Map,
+  // // PieChart,
+  // // Settings2,
+  // Settings,
   SquareTerminal
 } from 'lucide-react'
 
@@ -41,7 +41,7 @@ const data = {
         //   url: "/dashboard/session",
         // },
         {
-          title: 'Dashboard',
+          title: 'Management System',
           url: '/dashboard/home'
         }
         // {
@@ -70,63 +70,63 @@ const data = {
         // },
       ]
     },
-    {
-      title: 'Students File',
-      url: '#',
-      icon: Bot,
-      items: [
-        {
-          title: 'Students Records',
-          url: '#'
-        },
-        {
-          title: 'Score by Mark Sheet',
-          url: '#'
-        },
-        {
-          title: 'Course Registration Slip',
-          url: '#'
-        },
-        {
-          title: 'Course Result Slip',
-          url: '#'
-        }
-      ]
-    },
-    {
-      title: 'Reports',
-      url: '#',
-      icon: BookOpen,
-      items: [
-        {
-          title: 'Records Listing',
-          url: '#'
-        },
-        {
-          title: 'Departmental Results',
-          url: '#'
-        },
-        {
-          title: 'Mark Sheet',
-          url: '#'
-        },
-        {
-          title: 'Transcript Data Capture',
-          url: '#'
-        },
-        {
-          title: 'Academic Records',
-          url: '#'
-        }
-      ]
-    }
+    // {
+    //   title: 'Students File',
+    //   url: '#',
+    //   icon: Bot,
+    //   items: [
+    //     {
+    //       title: 'Students Records',
+    //       url: '#'
+    //     },
+    //     {
+    //       title: 'Score by Mark Sheet',
+    //       url: '#'
+    //     },
+    //     {
+    //       title: 'Course Registration Slip',
+    //       url: '#'
+    //     },
+    //     {
+    //       title: 'Course Result Slip',
+    //       url: '#'
+    //     }
+    //   ]
+    // },
+    // {
+    //   title: 'Reports',
+    //   url: '#',
+    //   icon: BookOpen,
+    //   items: [
+    //     {
+    //       title: 'Records Listing',
+    //       url: '#'
+    //     },
+    //     {
+    //       title: 'Departmental Results',
+    //       url: '#'
+    //     },
+    //     {
+    //       title: 'Mark Sheet',
+    //       url: '#'
+    //     },
+    //     {
+    //       title: 'Transcript Data Capture',
+    //       url: '#'
+    //     },
+    //     {
+    //       title: 'Academic Records',
+    //       url: '#'
+    //     }
+    //   ]
+    // }
   ],
   projects: [
-    {
-      name: 'More ...',
-      url: '/dashboard/more',
-      icon: Settings
-    }
+  //   {
+  //     name: 'More ...',
+  //     url: '/dashboard/more',
+  //     icon: Settings
+    // }
   ]
 }
 
