@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ .os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
@@ -15,7 +15,7 @@ jobs:
             electron_version: 37.2.6
             build_script: build:linux
           - os: macos-latest
-            electron_matrixversion: 37.2.6
+            electron_version: 37.2.6
             build_script: build:mac
           - os: windows-latest
             electron_version: 37.2.6
