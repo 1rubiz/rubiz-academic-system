@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join, dirname } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -265,8 +265,48 @@ app.whenReady().then(() => {
   createLoadingWindow()
   createWindow()
   if (app.isPackaged) {
-    autoUpdater.checkForUpdatesAndNotify()
+    // autoUpdater.checkForUpdatesAndNotify()
+    autoUpdater.autoDownload = false // Manual trigger from renderer
+
+    // 🧰 When download is done
+    autoUpdater.on('update-downloaded', () => {
+      const result = dialog.showMessageBoxSync({
+        type: 'info',
+        title: 'Update Ready',
+        message: 'An update has been downloaded. Restart now to install?',
+        buttons: ['Restart', 'Later']
+      })
+
+      if (result === 0) autoUpdater.quitAndInstall()
+    })
   }
+  ipcMain.handle('get-app-version', () => {
+    return app.getVersion()
+  })
+
+  // 🔍 Listen for renderer requests to check for updates
+  ipcMain.handle('check-for-update', async () => {
+    try {
+      const result = await autoUpdater.checkForUpdates()
+      if (result.updateInfo.version !== app.getVersion()) {
+        return { updateAvailable: true, info: result.updateInfo }
+      } else {
+        return { updateAvailable: false }
+      }
+    } catch (error) {
+      return { updateAvailable: false, error: error.message }
+    }
+  })
+
+  // ⬇️ Listen for renderer request to start downloading update
+  ipcMain.handle('download-update', async () => {
+    try {
+      await autoUpdater.downloadUpdate()
+      return { success: true }
+    } catch (error) {
+      return { success: false, error: error.message }
+    }
+  })
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

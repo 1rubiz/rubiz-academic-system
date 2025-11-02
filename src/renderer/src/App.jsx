@@ -13,6 +13,7 @@ import StudentPage from './pages/students/Page'
 import Faculty from './pages/create/Faculty'
 import Department from './pages/create/Department'
 import { ToastContainer } from 'react-toastify'
+import UpdateManager from './pages/Updates'
 // import Course from './pages/create/Course'
 // // student files
 // import Records from './pages/students/Records'
@@ -75,6 +76,7 @@ export default function App() {
             <Route path="/dashboard/session" element={<SessionManager />} />
             <Route path="/dashboard/sessions" element={<SessionPage />} />
             <Route path="/dashboard/result" element={<ResultEntry />} />
+            <Route path="/dashboard/updates" element={<UpdateManager />} />
 
             {/* more routes */}
             <Route path="/dashboard/more" element={<MoreRoutes />} />

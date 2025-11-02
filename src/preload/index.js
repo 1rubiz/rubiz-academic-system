@@ -8,6 +8,7 @@ import { facultyAPI } from '../utils/preloadsInvoke/faculties.js'
 import { sessionAPI } from '../utils/preloadsInvoke/sessions.js'
 import { resultAPI } from '../utils/preloadsInvoke/result.js'
 import { carryoverAPI } from '../utils/preloadsInvoke/carryovers.js'
+import { updatesAPI } from '../utils/preloadsInvoke/updates.js'
 
 console.log('🧠 Preload script running...')
 
@@ -19,5 +20,6 @@ contextBridge.exposeInMainWorld('api', {
   faculties: facultyAPI,
   sessions: sessionAPI,
   result: resultAPI,
-  carryovers: carryoverAPI
+  carryovers: carryoverAPI,
+  updates: updatesAPI
 })

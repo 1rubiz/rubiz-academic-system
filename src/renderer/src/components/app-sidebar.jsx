@@ -43,11 +43,11 @@ const data = {
         {
           title: 'Management System',
           url: '/dashboard/home'
+        },
+        {
+          title: 'Update Manager',
+          url: '/dashboard/updates'
         }
-        // {
-        //   title: "Sessions",
-        //   url: "/dashboard/sessions",
-        // },
         // {
         //   title: "Result",
         //   url: "/dashboard/result",
@@ -69,7 +69,7 @@ const data = {
         //   url: "/dashboard/courses",
         // },
       ]
-    },
+    }
     // {
     //   title: 'Students File',
     //   url: '#',
@@ -122,10 +122,10 @@ const data = {
     // }
   ],
   projects: [
-  //   {
-  //     name: 'More ...',
-  //     url: '/dashboard/more',
-  //     icon: Settings
+    //   {
+    //     name: 'More ...',
+    //     url: '/dashboard/more',
+    //     icon: Settings
     // }
   ]
 }

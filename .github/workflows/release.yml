@@ -50,26 +50,24 @@ jobs:
         run: npm run ${{ matrix.build_script }}
         shell: bash
 
-      - name: Clean and rename Windows artifacts ie Legacy/modern
-        if: matrix.suffix
+      - name: Clean and prepare artifacts
         run: |
           cd release
-          # Remove elevate.exe and other temporary files that shouldn't be uploaded
-          rm -f elevate.exe *.yml *.blockmap *-unpacked || true
-          # Rename remaining files with suffix
-          for file in *; do
-            if [ -f "$file" ]; then
-              mv "$file" "${{ matrix.suffix }}-$file"
-            fi
-          done
-        shell: bash
-
-      - name: Clean non-Windows artifacts
-        if: ${{ !matrix.suffix }}
-        run: |
-          cd release
-          # Remove temporary files for all platforms
-          rm -f elevate.exe *.yml *.blockmap *-unpacked || true
+          
+          # Remove all temporary files that shouldn't be released
+          rm -f elevate.exe *.yml *.blockmap || true
+          
+          # Remove unpacked directories
+          rm -rf *-unpacked || true
+          
+          # For Windows builds with suffix, rename files
+          if [ -n "${{ matrix.suffix }}" ]; then
+            for file in *; do
+              if [ -f "$file" ]; then
+                mv "$file" "${{ matrix.suffix }}-$file"
+              fi
+            done
+          fi
         shell: bash
 
       - name: Upload artifacts
@@ -77,6 +75,15 @@ jobs:
         with:
           name: ${{ matrix.os }}-${{ matrix.suffix || 'default' }}-artifacts
           path: release/
+          # Only upload the actual distributable files
+          include: |
+            *.exe
+            *.dmg
+            *.AppImage
+            *.deb
+            *.zip
+            *.rpm
+            *.snap
 
   release:
     needs: build
@@ -88,24 +95,52 @@ jobs:
       - name: Download all build artifacts
         uses: actions/download-artifact@v4
         with:
-          path: release
+          path: artifacts
+
+      - name: List downloaded artifacts
+        run: |
+          find artifacts -type f -name "*" | sort
+        shell: bash
+
+      - name: Prepare release files
+        run: |
+          # Create a clean release directory
+          mkdir -p release_files
+          
+          # Copy all distributable files from artifacts
+          find artifacts -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.zip" -o -name "*.rpm" -o -name "*.snap" \) -exec cp {} release_files/ \;
+          
+          # List what will be released
+          echo "Files to be released:"
+          ls -la release_files/
+        shell: bash
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           draft: false
-          overwrite: true
+          prerelease: false
+          generate_release_notes: true
           files: |
-            release/**/*.exe
-            release/**/*.dmg
-            release/**/*.AppImage
-            release/**/*.deb
-            release/**/*.zip
+            release_files/*.exe
+            release_files/*.dmg
+            release_files/*.AppImage
+            release_files/*.deb
+            release_files/*.zip
+            release_files/*.rpm
+            release_files/*.snap
           body: |
             🚀 **Academic Records Rubiz Release**
 
-            - 🟢 Modern Build → Windows 10/11 (Electron 37.2.6)
-            - 🕹️ Legacy Build → Windows 8.1 (Electron 22.3.27)
-            - 💻 Includes Linux and macOS builds
+            **Build Types:**
+            - 🟢 **Modern Build** → Windows 10/11 (Electron 37.2.6)
+            - 🕹️ **Legacy Build** → Windows 8.1 (Electron 22.3.27)
+            - 🐧 **Linux Build** → AppImage & DEB packages
+            -  **macOS Build** → DMG package
+
+            **Installation Instructions:**
+            - Windows: Use `modern-*.exe` for Windows 10/11, `legacy-*.exe` for Windows 8.1
+            - macOS: Mount the DMG and drag to Applications
+            - Linux: Make AppImage executable or install DEB package
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
