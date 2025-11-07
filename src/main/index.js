@@ -208,7 +208,7 @@ function createLoadingWindow() {
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    backgroundColor: '#000000',
+    backgroundColor: '#F8F8FF',
     width: 1400,
     height: 900,
     show: false,

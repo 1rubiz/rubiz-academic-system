@@ -2,6 +2,12 @@
 @import './base.css';
 @import "tw-animate-css";
 
+html,
+body {
+  background-color: ghostwhite; /* or your theme base color */
+  color: black; /* readable text color */
+}
+
 body {
   display: flex;
   align-items: center;
